@@ -45,8 +45,11 @@ class CommitService:
         context: Context,
         feedback: str | None = None,
     ) -> CommitProposal:
+        diff = context.staged_diff[: self.config.max_context_chars]
+        if len(context.staged_diff) > len(diff):
+            diff += "\n[truncated]"
         prompt = build_commit_prompt(
-            diff=context.staged_diff[: self.config.max_context_chars],
+            diff=diff,
             files=context.staged_files,
             repository_instructions=context.instructions,
             template=context.template,

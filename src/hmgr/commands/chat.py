@@ -29,7 +29,7 @@ class Chat:
                 github=self.github,
                 max_file_chars=self.config.max_file_chars,
                 query=question,
-                relevant_file_limit=min(8, self.config.max_relevant_files),
+                relevant_file_limit=min(12, self.config.max_relevant_files),
             )
             prompt = (
                 "Answer the user's question using only the repository evidence "

@@ -45,7 +45,7 @@ class PullRequestService:
             github=self.github,
             base_branch=base,
             max_file_chars=self.config.max_file_chars,
-            max_related_files=self.config.max_related_files,
+            relevant_file_limit=self.config.max_relevant_files,
         )
         print_context_manifest(context.manifest(), purpose="pull request generation")
 

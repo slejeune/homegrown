@@ -37,7 +37,7 @@ def build_context(
     base_branch: str | None = None,
     query: str | None = None,
     max_file_chars: int,
-    relevant_file_limit: int = 12,
+    relevant_file_limit: int = 20,
     max_related_files: int = 8,
     include_repository_map: bool = True,
     max_tracked_files: int = 500,
@@ -93,7 +93,9 @@ def build_context(
             else load_hmgr_file(HMGR_RESOURCE_FILES[purpose], max_file_chars)
         )
 
-    template_paths = {path for paths in TEMPLATE_FILES.values() for path in paths}
+    excluded_paths = {
+        path for paths in TEMPLATE_FILES.values() for path in paths
+    } | set(IMPORTANT_DOCUMENTS)
     relevant_paths = []
     if task_query:
         relevant_paths = [
@@ -104,7 +106,7 @@ def build_context(
                 tracked_files=tracked_files or git.tracked_files(),
                 limit=relevant_file_limit,
             )
-            if path not in template_paths
+            if path not in excluded_paths
         ]
 
     context = Context(
@@ -130,9 +132,7 @@ def build_context(
 
     if purpose == ArtifactKind.COMMIT:
         context.staged_files = git.staged_files()
-        context.staged_diff = git.staged_diff()[
-            : max_file_chars * max(1, relevant_file_limit)
-        ]
+        context.staged_diff = git.staged_diff()
     elif purpose == ArtifactKind.PULL_REQUEST:
         if not base_branch:
             raise ValueError("base_branch is required for pull request context")
@@ -211,6 +211,8 @@ def collect_file_contents(
                     terms=query_terms(query or ""),
                     max_chars=max_file_chars,
                 )
+                if not content:
+                    continue
             else:
                 content = content[:max_file_chars]
             result.append(

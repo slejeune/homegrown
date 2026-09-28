@@ -27,13 +27,30 @@ def build_issue_prompt(
     description: str,
     context: Context,
     max_chars: int | None = None,
+    max_optional_context_chars: int | None = None,
     feedback: str | None = None,
 ) -> str:
+    repository_instructions = context.render_instructions()
+    template = context.render_template()
+    fixed_prompt = build_artifact_prompt(
+        ISSUE_SPEC,
+        user_request=description,
+        repository_instructions=repository_instructions,
+        template=template,
+        feedback=feedback,
+    )
+    evidence_budget = max_chars
+    if evidence_budget is not None:
+        evidence_budget -= len(fixed_prompt) + len("\n\n## Repository evidence\n\n")
+        if max_optional_context_chars is not None:
+            evidence_budget = min(evidence_budget, max_optional_context_chars)
+        evidence_budget = max(0, evidence_budget)
+
     return build_artifact_prompt(
         ISSUE_SPEC,
         user_request=description,
-        repository_instructions=context.render_instructions(),
-        template=context.render_template(),
-        repository_evidence=context.render_evidence(max_chars=max_chars),
+        repository_instructions=repository_instructions,
+        template=template,
+        repository_evidence=context.render_evidence(max_chars=evidence_budget),
         feedback=feedback,
     )

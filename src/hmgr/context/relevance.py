@@ -217,18 +217,15 @@ def source_snippet(
     *,
     terms: set[str] | None = None,
     max_chars: int = 12_000,
-    context_lines: int = 20,
+    context_lines: int = 10,
 ) -> str:
     """Return focused source around matching lines, never an arbitrary prefix."""
-    if len(content) <= max_chars:
-        return content
-
     terms = terms or set()
     lines = content.splitlines()
     matches = matching_line_numbers(content, terms)
 
     if not matches:
-        return content[:max_chars] + "\n[truncated]"
+        return ""
 
     windows: list[tuple[int, int]] = []
     for line_no in matches:
