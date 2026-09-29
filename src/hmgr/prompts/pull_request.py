@@ -26,11 +26,14 @@ def build_pull_request_prompt(
     context: Context,
     max_chars: int | None = None,
     feedback: str | None = None,
+    optional_context_chars: int | None = None,
 ) -> str:
     return build_artifact_prompt(
         PULL_REQUEST_SPEC,
         repository_instructions=context.render_instructions(),
         template=context.render_template(),
-        repository_evidence=context.render_evidence(max_chars=max_chars),
+        repository_evidence=context.render_evidence(
+            max_chars=max_chars, optional_max_chars=optional_context_chars
+        ),
         feedback=feedback,
     )
