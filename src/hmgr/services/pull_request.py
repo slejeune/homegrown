@@ -54,6 +54,7 @@ class PullRequestService:
             prompt = build_pull_request_prompt(
                 context=context,
                 max_chars=self.config.max_context_chars,
+                optional_context_chars=self.config.max_optional_context_chars,
                 feedback=feedback,
             )
             proposal_data = self.ollama.chat_json(

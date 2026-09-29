@@ -122,10 +122,14 @@ class Context:
     def render_template(self) -> str | None:
         return self.template.render() if self.template else None
 
-    def render_evidence(self, max_chars: int | None = None) -> str:
+    def render_evidence(
+        self, max_chars: int | None = None, optional_max_chars: int | None = None
+    ) -> str:
         from .rendering import render_evidence
 
-        return render_evidence(self, max_chars=max_chars)
+        return render_evidence(
+            self, max_chars=max_chars, optional_max_chars=optional_max_chars
+        )
 
     def render(self, max_chars: int | None = None) -> str:
         from .rendering import render_context

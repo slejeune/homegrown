@@ -113,7 +113,11 @@ def render_manifest(entries: list[ContextEntry]) -> str:
     return "\n".join(lines)
 
 
-def render_evidence(context: Context, max_chars: int | None = None) -> str:
+def render_evidence(
+    context: Context,
+    max_chars: int | None = None,
+    optional_max_chars: int | None = None,
+) -> str:
     sections = [
         RenderSection(
             "repository",
@@ -167,15 +171,6 @@ def render_evidence(context: Context, max_chars: int | None = None) -> str:
         sections.append(
             RenderSection("diff", f"```diff\n{context.diff}\n```", 120, True)
         )
-    if context.changed_file_contents:
-        sections.append(
-            RenderSection(
-                "changed_file_contents",
-                render_files(context.changed_file_contents),
-                115,
-                True,
-            )
-        )
     if context.related_files:
         sections.append(
             RenderSection(
@@ -198,7 +193,22 @@ def render_evidence(context: Context, max_chars: int | None = None) -> str:
         sections.append(
             RenderSection("repository_files", "\n".join(context.tracked_files), 20)
         )
-    return render_sections(sections, max_chars=max_chars)
+
+    mandatory = [section for section in sections if section.priority >= 100]
+    optional = [section for section in sections if section.priority < 100]
+    mandatory_text = render_sections(mandatory)
+
+    if max_chars is None:
+        optional_budget = optional_max_chars
+    else:
+        optional_budget = max(0, max_chars - len(mandatory_text))
+        if optional_max_chars is not None:
+            optional_budget = min(optional_budget, optional_max_chars)
+
+    optional_text = render_sections(optional, max_chars=optional_budget)
+    if mandatory_text and optional_text:
+        return f"{mandatory_text}\n\n{optional_text}"
+    return mandatory_text or optional_text
 
 
 def render_context(context: Context, max_chars: int | None = None) -> str:

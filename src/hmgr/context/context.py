@@ -139,16 +139,6 @@ def build_context(
         context.changed_files = git.changed_files(base_branch)
         context.diff = git.diff(base_branch)
         context.commits = git.commits(base_branch)
-        for path in context.changed_files:
-            if not path or not is_allowed_path(path):
-                continue
-            diff = git.diff_file(base_branch, path, context_lines=20)
-            if diff:
-                context.changed_file_contents.append(
-                    ContextFile(
-                        path=path, content=diff[:max_file_chars], source_chars=len(diff)
-                    )
-                )
         related_paths = find_related_files(
             git,
             changed_files=context.changed_files,
