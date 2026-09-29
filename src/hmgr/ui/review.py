@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import asdict, is_dataclass
+import json
 from typing import TypeVar
 
 from .console import info
@@ -12,6 +14,7 @@ def review_proposal(
     generate: Callable[[str | None], T],
     display: Callable[[T], None],
     validate: Callable[[T], str | None] | None = None,
+    normalize: Callable[[T], list[str]] | None = None,
     max_validation_retries: int = 2,
 ) -> T | None:
     """Generate, validate, display, and optionally regenerate from feedback."""
@@ -20,8 +23,16 @@ def review_proposal(
 
     while True:
         proposal = generate(feedback)
+        normalized = normalize(proposal) if normalize else []
+        if normalized:
+            info(
+                "Removed request-related meta-language from: "
+                + ", ".join(normalized)
+                + "."
+            )
         validation_error = validate(proposal) if validate else None
         if validation_error:
+            info(f"Validation failed: {validation_error}")
             if validation_retries >= max_validation_retries:
                 info("Automatic validation retries exhausted; stopping generation.")
                 return None
@@ -32,7 +43,14 @@ def review_proposal(
                 f"retrying automatically ({validation_retries}/{max_validation_retries}) "
                 "with the validation feedback."
             )
-            feedback = validation_error
+            draft = asdict(proposal) if is_dataclass(proposal) else proposal
+            feedback = (
+                f"The previous draft failed validation: {validation_error}\n"
+                "Revise the draft to fix every listed problem. Preserve its valid "
+                "content and template fields; do not repeat the same failure. "
+                "Return the complete corrected artifact in the required JSON format.\n"
+                f"Previous draft JSON:\n{json.dumps(draft, ensure_ascii=False)}"
+            )
             continue
 
         display(proposal)
