@@ -7,19 +7,46 @@ from .models import ArtifactSpec
 ISSUE_SPEC = ArtifactSpec(
     kind=ArtifactKind.ISSUE,
     task=(
-        "Create a GitHub issue that another developer can act on without having "
-        "to rediscover the intent."
+        "Turn the user's request into a useful GitHub issue using the supplied "
+        "issue template."
     ),
     instructions="""
-Follow the supplied issue template as the authoritative structure when present.
-Omit sections that cannot be supported by the available evidence. Acceptance
-criteria must be short and verifiable. Preserve ambiguity when the request is
-ambiguous. Use repository instructions and documentation as the source of
-implementation guidance; source code may establish current behavior but does not
-by itself prescribe a change. Use file references only when the exact path appears
-in the evidence. Do not repeat the user request verbatim.
+The bundled issue template is authoritative. Return one JSON string for each
+template section: problem, expected_outcome, acceptance_criteria, and
+implementation_notes. Also return title for the GitHub issue title. Do not
+replace, omit, or add template sections.
+
+Treat the user's request as the source of the requested intent and requirements.
+
+Use only information that is explicitly stated in the user request or directly
+supported by repository evidence.
+
+Do not:
+- invent a current problem, motivation, requirement, or acceptance criterion;
+- assume that a requested change describes an existing bug;
+- turn a desired outcome into a claim about the current state;
+- invent implementation details;
+- repeat the user request verbatim.
+
+Do:
+- preserve the actual intent and requirements of the user request;
+- rewrite and condense the request where appropriate;
+- use repository evidence to clarify concrete paths, names, and existing behavior;
+- place information into the matching bundled template sections;
+- preserve the template's headings, ordering, formatting, and conventions;
+- omit unsupported information rather than guessing;
+- preserve ambiguity when the request is genuinely ambiguous.
+
+Acceptance criteria should only be included when they are supported by the user
+request or repository evidence.
+
+Return the issue content in the bundled template's section order.
 """.strip(),
-    output_requirements="Return only JSON matching the requested output schema.",
+    output_requirements=(
+        "Return only JSON with string fields title, problem, expected_outcome, "
+        "acceptance_criteria, and implementation_notes. Put each section's "
+        "content in its matching field; do not return markdown headings."
+    ),
 )
 
 

@@ -159,7 +159,7 @@ def print_pr_proposal(proposal) -> None:
 def print_commit_proposal(proposal) -> None:
     heading("\nCOMMIT PROPOSAL")
     print(_paint("=" * 60, DIM))
-    print(f"\n{proposal.message}")
+    print(f"\n{proposal.subject}")
     if proposal.body:
         print(f"\n{proposal.body}")
     print(_paint("\n" + "=" * 60, DIM))

@@ -17,11 +17,6 @@ from .relevance import (
 
 IMPORTANT_DOCUMENTS = ["README.md", "README", "CONTRIBUTING.md"]
 INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md"]
-TEMPLATE_FILES = {
-    ArtifactKind.ISSUE: [".github/ISSUE_TEMPLATE.md"],
-    ArtifactKind.COMMIT: [".github/COMMIT_TEMPLATE.md"],
-    ArtifactKind.PULL_REQUEST: [".github/PULL_REQUEST_TEMPLATE.md"],
-}
 HMGR_RESOURCE_FILES = {
     ArtifactKind.ISSUE: "issue-template.md",
     ArtifactKind.COMMIT: "commit-template.md",
@@ -86,16 +81,9 @@ def build_context(
 
     template = None
     if purpose is not None:
-        templates = collect_file_contents(git, TEMPLATE_FILES[purpose], max_file_chars)
-        template = (
-            templates[0]
-            if templates
-            else load_hmgr_file(HMGR_RESOURCE_FILES[purpose], max_file_chars)
-        )
+        template = load_hmgr_file(HMGR_RESOURCE_FILES[purpose], max_file_chars)
 
-    excluded_paths = {
-        path for paths in TEMPLATE_FILES.values() for path in paths
-    } | set(IMPORTANT_DOCUMENTS)
+    excluded_paths = set(IMPORTANT_DOCUMENTS)
     relevant_paths = []
     if task_query:
         relevant_paths = [

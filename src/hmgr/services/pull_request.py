@@ -9,7 +9,7 @@ from ..prompts.pull_request import (
     build_pull_request_prompt,
 )
 from ..ui.context import print_context_manifest
-from ..validation import mark_unverified_file_references, validate_pull_request_proposal
+from ..validation import mark_unverified_file_references, remove_meta_language, validate_pull_request_proposal
 from ..ui.review import review_proposal
 from ..ui.console import (
     info,
@@ -64,21 +64,24 @@ class PullRequestService:
                 num_ctx=self.config.context_window_tokens,
             )
             proposal = PullRequestProposal.from_dict(proposal_data)
-            proposal.body = mark_unverified_file_references(
-                proposal.body,
+            proposal.changes = mark_unverified_file_references(
+                proposal.changes,
                 set(context.changed_files)
                 | {file.path for file in context.related_files},
             )
             if context.issue:
                 closing_text = f"Fixes #{context.issue.number}"
-                if closing_text.lower() not in proposal.body.lower():
-                    proposal.body = proposal.body.rstrip() + f"\n\n{closing_text}\n"
+                if closing_text.lower() not in proposal.related_issue.lower():
+                    proposal.related_issue = "\n".join(
+                        part for part in (proposal.related_issue, closing_text) if part
+                    )
             return proposal
 
         proposal = review_proposal(
             generate,
             print_pr_proposal,
             validate=validate_pull_request_proposal,
+            normalize=remove_meta_language,
         )
         if proposal is None:
             info("Pull request creation cancelled.")

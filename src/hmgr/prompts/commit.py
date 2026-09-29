@@ -9,10 +9,14 @@ COMMIT_SPEC = ArtifactSpec(
     task="Write a useful Git commit message for the staged changes.",
     instructions="""
 Describe what the staged changes actually do, not what the author may have
-intended. Follow the supplied commit template when present. Do not invent
+intended. Follow the bundled commit template: subject is the concise imperative
+subject, and body is the optional context. Do not invent
 motivation, issue references, tests, or behavior. Avoid vague commit messages.
 """.strip(),
-    output_requirements="Return only JSON matching the requested output schema.",
+    output_requirements=(
+        "Return only JSON with string fields subject and body, matching the "
+        "bundled commit template. Do not return markdown headings."
+    ),
 )
 
 
