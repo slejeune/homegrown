@@ -8,7 +8,7 @@ from ..prompts.commit import build_commit_prompt
 from ..ui.console import info, print_commit_proposal, success
 from ..ui.context import print_context_manifest
 from ..ui.review import review_proposal
-from ..validation import validate_commit_proposal
+from ..validation import remove_meta_language, validate_commit_proposal
 
 
 class CommitService:
@@ -75,6 +75,7 @@ class CommitService:
             generate,
             print_commit_proposal,
             validate=validate_commit_proposal,
+            normalize=remove_meta_language,
         )
         if proposal is None:
             info("Commit creation cancelled.")

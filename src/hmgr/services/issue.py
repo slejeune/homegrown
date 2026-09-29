@@ -8,7 +8,7 @@ from ..models import IssueProposal
 from ..artifacts import ArtifactKind
 from ..prompts.issue import build_issue_prompt
 from ..ui.context import print_context_manifest
-from ..validation import mark_unverified_file_references, validate_issue_proposal
+from ..validation import mark_unverified_file_references, remove_meta_language, validate_issue_proposal
 from ..ui.review import review_proposal
 from ..ui.console import (
     info,
@@ -59,8 +59,8 @@ class IssueService:
                 num_ctx=self.config.context_window_tokens,
             )
             proposal = IssueProposal.from_dict(proposal_data)
-            proposal.body = mark_unverified_file_references(
-                proposal.body, set(context.tracked_files)
+            proposal.implementation_notes = mark_unverified_file_references(
+                proposal.implementation_notes, set(context.tracked_files)
             )
             return proposal
 
@@ -68,6 +68,7 @@ class IssueService:
             generate,
             print_issue_proposal,
             validate=validate_issue_proposal,
+            normalize=remove_meta_language,
         )
         if proposal is None:
             info("Issue creation cancelled.")

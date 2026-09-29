@@ -11,14 +11,19 @@ PULL_REQUEST_SPEC = ArtifactSpec(
         "review of the current branch."
     ),
     instructions="""
-The diff is authoritative for what changed. Follow the supplied pull request
-template as the authoritative structure when present. Report testing only when
+The diff is authoritative for what changed. Follow the bundled pull request
+template: return summary, changes, testing, and related_issue sections, plus
+title for the GitHub pull request title. Report testing only when
 the evidence explicitly shows it was performed. Call out risks, limitations, or
 follow-up work only when supported by evidence. Never claim that an issue was
 resolved or that a design decision was intentional unless supported by evidence.
 Use exact file paths only when they appear in the evidence.
         """.strip(),
-    output_requirements="Return only JSON matching the requested output schema.",
+    output_requirements=(
+        "Return only JSON with string fields title, summary, changes, testing, "
+        "and related_issue. Put each section's content in its matching field; "
+        "do not return markdown headings."
+    ),
 )
 
 

@@ -31,8 +31,8 @@ def build_artifact_prompt(
 ) -> str:
     """Build a fresh artifact prompt, optionally with additional feedback.
 
-    Feedback is appended to the original request; the previous proposal is never
-    part of the prompt. Every call therefore represents a fresh generation.
+    Validation retries include the rejected draft so the model can make a
+    targeted correction while preserving valid content.
     """
     sections = [
         ("Common instructions", COMMON_INSTRUCTIONS),
